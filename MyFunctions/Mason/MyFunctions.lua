@@ -251,9 +251,7 @@ function WrathBS()
     end
   end
 end
---------------------------------------------------------------
----             Stancing from one Key                      ---
---------------------------------------------------------------
+
 StanceOption = {
   ["tank"] = false,
   ["dps"] = true,
@@ -270,7 +268,6 @@ function StanceOption:SetStance()
     self.string = "Defensive Stance will change to Battle Stance"
   end
 end
-
 
 function OneActionStancing()
   if IsShiftKeyDown() then
@@ -294,5 +291,36 @@ function OneActionStancing()
     elseif isBerserkerStance() then
       castBattleStance(test)
     end
+  end
+end
+
+
+--------------------------------------------------------------
+---                Cooldown Sequences                      ---
+--------------------------------------------------------------
+
+function isDWActive()
+  if Zorlen_checkDebuff("DeathWish", "player")
+    return true
+  end
+  return false
+end
+
+function isBadgeActive()
+  if Zorlen_checkSelfBuffByName("Badge of the Swarmguard", "player") then
+    return true
+  end
+  return false
+end
+
+--Both having 30 second duration best strat is to couple their useage
+
+function DeathBadge()
+  if isDWActive() then
+    if Zorlen_isItemByNameEquipped("Badge of the Swarmguard") then
+      Zorlen_useTrinketByName("Badge of the Swarmgaurd")
+    end
+  else
+    castDeathWish(test)
   end
 end
