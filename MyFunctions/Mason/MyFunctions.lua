@@ -179,7 +179,7 @@ function SwapInWrath()
   if not isWrathEquipped() then
     WrathInBags()
     if ItemsInvArray() then
-      for i, v in pairs(WratheqSlot) do
+      for _, v in pairs(WratheqSlot) do
         Zorlen_useItemByName(v)
       end
     end
@@ -251,12 +251,15 @@ function WrathBS()
     end
   end
 end
+----------------------------------------------------------------------------------------
+---                          One Key Warrior Stancing                                 --
+----------------------------------------------------------------------------------------
 
 StanceOption = {
-  ["tank"] = false,
-  ["dps"] = true,
+  ["tank"] = false,  --Defensive stance to Batle Stance
+  ["dps"] = true,    --Defensive stance goes to Berserker Stance
 }
---set options for
+--set options for what defenseive stance goes to
 function StanceOption:SetStance()
   if self.tank == true then
     self.dps = true
@@ -269,12 +272,12 @@ function StanceOption:SetStance()
   end
 end
 
-function OneActionStancing()
+function OneActionStancing(shield)
   if IsShiftKeyDown() then
     if not isDefensiveStance() then
       Zorlen_castSpellByName("Defensive Stance")
-    elseif isDefensiveStance() and UnitHealth("player") <= 60 then
-      Zorlen_useItemByName("The Face of Death")
+    elseif isDefensiveStance() and UnitHealth("player") <= 60 and shield then
+      Zorlen_useItemByName(shield)
     end
   elseif IsControlKeyDown() then
     StanceOption:SetStance()
@@ -300,7 +303,7 @@ end
 --------------------------------------------------------------
 
 function isDWActive()
-  if Zorlen_checkDebuff("DeathWish", "player")
+  if Zorlen_checkDebuff("DeathWish", "player") then
     return true
   end
   return false
@@ -313,7 +316,7 @@ function isBadgeActive()
   return false
 end
 
---Both having 30 second duration best strat is to couple their useage
+--Both having 30 second duration the best strategy is to couple their useage
 
 function DeathBadge()
   if isDWActive() then
