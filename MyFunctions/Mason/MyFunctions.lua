@@ -327,3 +327,35 @@ function DeathBadge()
     castDeathWish(test)
   end
 end
+
+function isExpose()
+	if Zorlen_checkDebuffByName("Expose Armor","target") then
+		return true
+	else
+		return false
+	end
+end
+	
+function BSOrSunder(dps)  --dps boolean arg if true it will always be sunder armor if left blank or given the value of false it will cast Battle shout if expose armor is up.
+	if UnitClass("Player") == "Warrior" then  -- added to prevent bugs from attempted use outside of the warrior c;ass
+		if dps then  --added a shift modifer to give this macro two spells shift press battle shout and regular press sunder armor.
+			if IsShiftKeyDown() then
+				Zorlen_castSpellByName("Battle Shout")
+			elseif not IsShiftKeyDown() then
+				if isSunderFull() then --no reason to sunder as DPS if it is fully stacked
+					return false --do nothing could add a console message to notify player its fully stacked
+				else
+					if UnitMana("Player") >= 15 then --rage check could add check for targets range but its late
+						Zorlen_castSpellByName("Sunder Armor")
+					end
+				end
+			end
+		else 
+			if isExpose() and UnitMana("player") >= 10 then --a few reasons 1)in the case of active expose sunder returns an error message and doesnt work 
+				Zorlen_castSpellByName("Battle Shout")  --reason 2 battle shout grants the player 70 rage per player the buff reaches(group of 5 hitting all = 350 threat
+			elseif not isExpose() and UnitMana("Player") >=15 then --where as sunder armor is a flat 270 threat at 15 rage so threat per rage point battle shout outshines in single target
+ 				Zorlen_castSpellByName("Sunder Armor") --With that said it splits the threat generation between all active targets so while great for pulling far away not as good as sunder with 3+ targets
+			end
+		end
+	end
+end
