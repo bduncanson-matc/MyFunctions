@@ -328,6 +328,33 @@ function DeathBadge()
   end
 end
 
+function isRage(value)
+  if UnitClass("player") == "Warrior" and type(value) == number then
+    if UnitMana("player") >= value then
+      return true
+    else
+      return false
+    end
+  end
+end
+
+function isShieldEQ()
+  local item = GetInventoryItemLink("player", 17)
+  if item then
+    local _, _, itemCode = strfind(item, "(%d+):")
+    local _, _, _, _, _, itemType = GetItemInfo(itemCode)
+    if itemType == "Shields" and not GetInventoryItemBroken("player", 17) then
+      return true
+    end
+  end
+  return false
+end
+
+
+
+------------------------------------------------------------------
+---                     Threat Rage Dump                       ---
+------------------------------------------------------------------
 function isExpose()
 	if Zorlen_checkDebuffByName("Expose Armor","target") then
 		return true
@@ -352,10 +379,67 @@ function BSOrSunder(dps)  --dps boolean arg if true it will always be sunder arm
 			end
 		else 
 			if isExpose() and UnitMana("player") >= 10 then --a few reasons 1)in the case of active expose sunder returns an error message and doesnt work 
-				Zorlen_castSpellByName("Battle Shout")  --reason 2 battle shout grants the player 70 rage per player the buff reaches(group of 5 hitting all = 350 threat
+				Zorlen_castSpellByName("Battle Shout")  --reason 2) battle shout grants the player 70 rage per player the buff reaches(group of 5 hitting all = 350 threat
 			elseif not isExpose() and UnitMana("Player") >=15 then --where as sunder armor is a flat 270 threat at 15 rage so threat per rage point battle shout outshines in single target
  				Zorlen_castSpellByName("Sunder Armor") --With that said it splits the threat generation between all active targets so while great for pulling far away not as good as sunder with 3+ targets
 			end
 		end
 	end
+end
+------------------------------------------------------------------
+---                        Threat Range                        ---
+------------------------------------------------------------------
+function shootWeapon()
+  for i = 1, 120 do
+    t = GetActionTexture(i)
+    if t then
+      if string.find(t, "Ability_Marksmanship") then
+        if IsUsableAction(i) then
+          UseAction(i)
+        end
+      end
+    end
+  end
+end
+
+function isMeleeRange()
+  if IsActionInRange(Zorlen_Button["Hamstring"]) or IsActionInRange(Zorlen_Button["Attack"]) then
+    return true
+  else
+    return false
+  end
+end
+
+function RangeThreat()
+  if Zorlen_notInCombat() and isEnemyMob("target") then
+    shootWeapon()
+  elseif Zorlen_Combat() and not isMeleeRange() and isRage(10) then
+    Zorlen_castSpellByName("Battle Shout")
+  elseif Zorlen_Combat() and not isMeleeRange() and not isRage(10) then
+    Zorlen_castSpellByName("Bloodrage")
+  elseif isMeleeRange() and isRage(30) then
+    Zorlen_castSpellByName("Bloodthirst")
+  end
+end
+
+function QuickThreat(Boss, trinket1, trinket2)
+  if Boss then
+    if Zorlen_Combat and UnitLevel("target") == -1 and isRage(10) and UnitHealth("player") >= 90 then
+      Zorlen_castSpellByName("Death Wish")
+    elseif Zorlen_checkDebuffByName("Death Wish") and trinket1 then
+      Zorlen_useTrinketByName(trinket1)
+    elseif Zorlen_checkSelfBuffByName(trinket1) and trinket2 then
+      Zorlen_useTrinketByName(trinket2)
+    elseif isRage(30) and isMeleeRange() then
+      Zorlen_castSpellByName("Bloodthirst")
+    end
+  end
+end
+
+---------------------------------------------------------------------
+---                       Tanking Rotation                        ---
+---------------------------------------------------------------------
+
+function FuryTankSingle()
+
 end
