@@ -337,7 +337,9 @@ function isRage(value)
     end
   end
 end
-
+---------------------------------------------------------------------------------------
+---                           Utility Functions                                     ---
+---------------------------------------------------------------------------------------
 function isShieldEQ()
   local item = GetInventoryItemLink("player", 17)
   if item then
@@ -350,7 +352,22 @@ function isShieldEQ()
   return false
 end
 
+function isQuedForNext()
+  if IsCurrentAction(Zorlen_Button["Heroic Strike"]) or IsCurrentAction(Zorlen_Button["Cleave"]) then
+    return true
+  else
+    return false
+  end
+end
 
+function BTTimeLeft()
+  local start, duration, enable = GetActionCooldown(Zorlen_Button["Bloodthirst"])
+  if start == 0 then
+    return false, Zorlen_checkCooldownByName("Bloodthirst")
+  else
+    return((start+duration)-GetTime())
+  end
+end
 
 ------------------------------------------------------------------
 ---                     Threat Rage Dump                       ---
@@ -441,5 +458,29 @@ end
 ---------------------------------------------------------------------
 
 function FuryTankSingle()
-
+  if isShieldEQ() then
+    if Zorlen_checkCooldownByName("Shield Block") and isRage(10) then
+      Zorlen_castSpellByName("Shield Block")
+    else
+      if Zorlen_checkCooldownByName("Bloodthirst") and isRage(30) then
+        Zorlen_castSpellByName("Bloodthirst")
+      elseif isRage(40) and not isQuedForNext() then
+        Zorlen_castSpellByName("Heroic Stirke")
+      elseif isRage(5) and IsUsableAction(Zorlen_Button["Revenge"]) and BTTimeLeft() > 1.5 then
+        Zorlen_castSpellByName("Revenge")
+      elseif isRage(55) and BTTimeLeft() > 1.5 then
+        BSOrSunder()
+      end
+    end
+  else
+    if Zorlen_checkCooldownByName("Bloodthirst") and isRage(30) then
+      Zorlen_castSpellByName("Bloodthirst")
+    elseif isRage(40) and not isQuedForNext() then
+      Zorlen_castSpellByName("Heroic Stirke")
+    elseif isRage(5) and IsUsableAction(Zorlen_Button["Revenge"]) and BTTimeLeft() > 1.5 then
+      Zorlen_castSpellByName("Revenge")
+    elseif isRage(55) and BTTimeLeft() > 1.5 then
+      BSOrSunder()
+    end
+  end
 end
